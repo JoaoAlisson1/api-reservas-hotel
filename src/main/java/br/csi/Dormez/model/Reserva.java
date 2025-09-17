@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -19,8 +21,8 @@ public class Reserva {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private LocalDate checkIn;
-    private LocalDate checkOut;
+    private LocalDateTime checkIn;
+    private LocalDateTime checkOut;
 
     private double valorTotal;
 
@@ -31,9 +33,13 @@ public class Reserva {
     @JoinColumn(name = "funcionario_id")
     private Funcionario funcionario;
 
-    @ManyToOne
-    @JoinColumn(name = "hospede_id")
-    private Hospede hospede;
+    @ManyToMany
+    @JoinTable(
+            name = "reserva_hospede",
+            joinColumns = @JoinColumn(name = "reserva_id"),
+            inverseJoinColumns = @JoinColumn(name = "hospede_id")
+    )
+    private List<Hospede> hospedes;
 
     @ManyToOne
     @JoinColumn(name = "quarto_id")

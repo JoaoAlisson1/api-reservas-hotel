@@ -1,7 +1,8 @@
 package br.csi.Dormez.model;
 
 public enum StatusReserva {
-    PENDENTE,
-    CONFIRMADO,
-    CANCELADO
+    Reservada,
+    Check_in,
+    Check_out,
+    Cancelada
 }
