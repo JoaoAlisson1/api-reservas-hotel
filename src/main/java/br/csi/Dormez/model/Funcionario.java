@@ -1,10 +1,7 @@
 package br.csi.Dormez.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.List;
@@ -17,6 +14,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class Funcionario {
 
     @Id
@@ -25,8 +23,11 @@ public class Funcionario {
 
     @UuidGenerator
     private UUID uuid;
+
     private String nome;
+
     private String email;
+
     private String telefone;
 
     @Enumerated(EnumType.STRING) // salva o nome do enum no DB
@@ -34,6 +35,15 @@ public class Funcionario {
 
     @OneToMany(mappedBy = "funcionario")
     private List<Reserva> reservas;
+
+    //  Construtor personalizado para criação rápida
+    public Funcionario(String nome, String email, String telefone, CargoEnum cargo) {
+        this.nome = nome;
+        this.email = email;
+        this.telefone = telefone;
+        this.cargo = cargo;
+    }
+
 
 
 }

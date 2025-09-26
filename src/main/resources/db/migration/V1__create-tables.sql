@@ -1,8 +1,6 @@
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
-CREATE TYPE cargo_enum AS ENUM ('Recepcionista', 'Gerente');
-
 CREATE TABLE funcionario(
 
     id serial not null primary key,
@@ -10,7 +8,7 @@ CREATE TABLE funcionario(
     nome varchar(50) not null,
     email varchar(100) not null unique,
     telefone varchar(20) not null,
-    cargo cargo_enum not null
+    cargo varchar(100)
 );
 
 CREATE TABLE hospede (
@@ -23,32 +21,22 @@ CREATE TABLE hospede (
     cpf varchar(14) NOT NULL UNIQUE
 );
 
-CREATE TYPE tipo_quarto AS ENUM (
-    'Solteiro', 'Casal', 'Duplo', 'Triplo', 'Familiar', 'Suíte'
-    );
-
-CREATE TYPE status_quarto AS ENUM (
-    'Disponível', 'Ocupado', 'Reservado', 'Manutenção', 'Limpeza', 'Indisponível'
-    );
 
 CREATE TABLE quarto (
     id serial PRIMARY KEY,
     numero varchar(10) NOT NULL,
-    tipo tipo_quarto NOT NULL,
-    status status_quarto NOT NULL,
+    tipo varchar(50) NOT NULL,
+    status varchar(50) NOT NULL,
     diaria decimal NOT NULL
 );
 
-CREATE TYPE status_reserva AS ENUM (
-    'Reservada', 'Check-in', 'Check-out', 'Cancelada'
-    );
 
 CREATE TABLE reserva (
     id serial PRIMARY KEY,
     check_in TIMESTAMP NOT NULL,
     check_out TIMESTAMP NOT NULL,
     valor_total DECIMAL(10, 2) NOT NULL,
-    status status_reserva NOT NULL,
+    status varchar(30) NOT NULL,
     quarto_id INT REFERENCES quarto(id),
     funcionario_id INT REFERENCES funcionario(id)
 );

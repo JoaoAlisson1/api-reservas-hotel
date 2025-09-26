@@ -26,6 +26,6 @@ public class Hospede { // avaliar código dps
     private String telefone;
     private String cpf;
 
-    @OneToMany(mappedBy = "hospede")
+    @ManyToMany(mappedBy = "hospedes")
     private List<Reserva> reservas;
 }

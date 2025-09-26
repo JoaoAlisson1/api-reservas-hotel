@@ -30,6 +30,7 @@ public class FuncionarioService {
     }
 
     public void atualizar(Funcionario funcionario) {
+
         Funcionario func = this.repository.getReferenceById(funcionario.getId());
         func.setNome(funcionario.getNome());
         func.setEmail(funcionario.getEmail());
