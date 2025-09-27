@@ -3,8 +3,10 @@ package br.csi.Dormez.service;
 import br.csi.Dormez.model.Funcionario;
 import br.csi.Dormez.repository.FuncionarioRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class FuncionarioService {
@@ -21,20 +23,23 @@ public class FuncionarioService {
         return this.repository.findAll();
     }
 
-    public Funcionario buscarPorId(Long id) {
-        return this.repository.findById(id).get();
+    public Funcionario buscarPorUUID(String uuid) {
+        UUID uuidformatado = UUID.fromString(uuid);
+        return this.repository.findFuncionarioByUuid(uuidformatado);
     }
 
-    public void excluir(Long id) {
-        this.repository.deleteById(id);
+    @Transactional
+    public void deletarUUID(String uuid) {
+        this.repository.deleteFuncionarioByUuid(UUID.fromString(uuid));
     }
 
-    public void atualizar(Funcionario funcionario) {
+    public void atualizarUUID(Funcionario funcionario) {
 
-        Funcionario func = this.repository.getReferenceById(funcionario.getId());
+        Funcionario func = this.repository.findFuncionarioByUuid(funcionario.getUuid());
         func.setNome(funcionario.getNome());
         func.setEmail(funcionario.getEmail());
         func.setTelefone(funcionario.getTelefone());
+        func.setCargo(funcionario.getCargo());
         this.repository.save(func);
     }
 }
