@@ -28,8 +28,8 @@ public class FuncionarioController {
         this.service.salvar(funcionario);
     }
 
-    @PutMapping("/uuid")
-    public void atualizarUUID(@RequestBody Funcionario funcionario) {
+    @PutMapping("/{uuid}")
+    public void atualizarUUID(@RequestBody Funcionario funcionario, @PathVariable String uuid) {
         this.service.atualizarUUID(funcionario);
     }
 

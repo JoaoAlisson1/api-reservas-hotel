@@ -3,6 +3,7 @@ package br.csi.Dormez.service;
 import br.csi.Dormez.model.Hospede;
 import br.csi.Dormez.repository.HospedeRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +36,7 @@ public class HospedeService {
         return this.Repository.findHospedeByCpf(cpf);
     }
 
+    @Transactional
     public void deletarPorUUID(String uuid) {
         this.Repository.deleteHospedeByUuid(UUID.fromString(uuid));
     }
