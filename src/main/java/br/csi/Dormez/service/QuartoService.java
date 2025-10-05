@@ -21,6 +21,18 @@ public class QuartoService {
         return repository.findAll();
     }
 
+    public void atualizar(Quarto quarto, Long id) {
+        Quarto q = this.repository.findById(id).get();
+
+        q.setNumero(quarto.getNumero());
+        q.setTipo(quarto.getTipo());
+        q.setStatus(quarto.getStatus());
+        q.setDiaria(quarto.getDiaria());
+        q.setReservas(quarto.getReservas());
+        this.repository.save(q);
+
+    }
+
     public Quarto buscarPorId(Long id) {
         return repository.findById(id).get();
     }
