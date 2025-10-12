@@ -1,6 +1,8 @@
 package br.csi.Dormez.service;
 
+import br.csi.Dormez.model.Hospede;
 import br.csi.Dormez.model.Reserva;
+import br.csi.Dormez.repository.HospedeRepository;
 import br.csi.Dormez.repository.ReservaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,10 +14,16 @@ import java.util.UUID;
 public class ReservaService {
 
     private final ReservaRepository repository;
+    private final HospedeRepository hospedeRepository;
 
-    public ReservaService(ReservaRepository repository) {this.repository = repository;}
+    public ReservaService(ReservaRepository repository, HospedeRepository hospedeRepository) {
+        this.repository = repository;
+        this.hospedeRepository = hospedeRepository;
+    }
 
-    public void salvar(Reserva reserva) {
+    public void salvar(Reserva reserva, List<UUID> hospedeUUIDs  ) {
+        List<Hospede> hospedes = hospedeRepository.findAllByUuidIn(hospedeUUIDs);
+        reserva.setHospedes(hospedes);
         this.repository.save(reserva);
     }
 
@@ -33,7 +41,8 @@ public class ReservaService {
         this.repository.deleteReservaByUuid(UUID.fromString(uuid));
     }
 
-    public void atualizarUUID(Reserva reserva) {
+
+    public void atualizarUUID(Reserva reserva, List<UUID> hospedeUUIDs ) {
 
         Reserva reserv = this.repository.findReservaByUuid(reserva.getUuid());
         reserv.setCheckIn(reserva.getCheckIn());
@@ -42,7 +51,9 @@ public class ReservaService {
         reserv.setStatus(reserva.getStatus());
         reserv.setFuncionario(reserva.getFuncionario());
         reserv.setQuarto(reserva.getQuarto());
-        reserv.setHospedes(reserva.getHospedes());
+
+        List<Hospede> hospedes = hospedeRepository.findAllByUuidIn(hospedeUUIDs);
+        reserv.setHospedes(hospedes);
         this.repository.save(reserv);
     }
 }

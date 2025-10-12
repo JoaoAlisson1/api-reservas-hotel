@@ -1,5 +1,6 @@
 package br.csi.Dormez.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
@@ -34,6 +35,7 @@ public class Funcionario {
     private CargoEnum cargo;
 
     @OneToMany(mappedBy = "funcionario")
+    @JsonIgnore
     private List<Reserva> reservas;
 
     //  Construtor personalizado para criação rápida

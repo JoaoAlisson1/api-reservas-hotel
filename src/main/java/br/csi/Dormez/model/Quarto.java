@@ -1,5 +1,6 @@
 package br.csi.Dormez.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,6 +31,7 @@ public class Quarto {
     private BigDecimal diaria;
 
     @OneToMany(mappedBy = "quarto")
+    @JsonIgnore
     private List<Reserva> reservas;
 
 }

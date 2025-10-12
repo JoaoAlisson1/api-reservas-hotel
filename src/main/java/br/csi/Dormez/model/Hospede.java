@@ -1,5 +1,6 @@
 package br.csi.Dormez.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +20,7 @@ public class Hospede { // avaliar código dps
     private long id;
 
     @UuidGenerator
+    @Column(nullable = false, unique = true, updatable = false)
     private UUID uuid;
 
     private String nome;
@@ -27,5 +29,6 @@ public class Hospede { // avaliar código dps
     private String cpf;
 
     @ManyToMany(mappedBy = "hospedes")
+    @JsonIgnore
     private List<Reserva> reservas;
 }

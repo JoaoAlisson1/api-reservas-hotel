@@ -1,10 +1,12 @@
 package br.csi.Dormez.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,6 +24,7 @@ public class Reserva {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @UuidGenerator
     @Column(unique = true, updatable = false, nullable = false)
     private UUID uuid;
 
@@ -47,6 +50,7 @@ public class Reserva {
 
     @ManyToOne
     @JoinColumn(name = "quarto_id")
+
     private Quarto quarto;
 
 }
