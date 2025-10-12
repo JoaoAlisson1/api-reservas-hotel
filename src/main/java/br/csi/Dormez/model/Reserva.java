@@ -9,6 +9,7 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -20,6 +21,9 @@ public class Reserva {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @Column(unique = true, updatable = false, nullable = false)
+    private UUID uuid;
 
     private LocalDateTime checkIn;
     private LocalDateTime checkOut;
