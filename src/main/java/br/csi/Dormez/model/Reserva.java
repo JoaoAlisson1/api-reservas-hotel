@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -31,7 +31,7 @@ public class Reserva {
     private LocalDateTime checkIn;
     private LocalDateTime checkOut;
 
-    private double valorTotal;
+    private BigDecimal valorTotal;
 
     @Enumerated(EnumType.STRING)
     private StatusReserva status;
