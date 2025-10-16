@@ -11,9 +11,9 @@ import java.util.UUID;
 @RequestMapping("/hospede")
 public class HospedeController {
 
-    HospedeService service;
+    private HospedeService service;
 
-    HospedeController(HospedeService service) {this.service = service;}
+    public HospedeController(HospedeService service) {this.service = service;}
 
     @GetMapping("/listar")
     public List<Hospede> listar() {

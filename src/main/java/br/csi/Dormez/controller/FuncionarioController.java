@@ -2,8 +2,12 @@ package br.csi.Dormez.controller;
 
 import br.csi.Dormez.model.Funcionario;
 import br.csi.Dormez.service.FuncionarioService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -24,17 +28,22 @@ public class FuncionarioController {
     }
 
     @PostMapping()
-    public void salvar(@RequestBody Funcionario funcionario) {
+    public ResponseEntity<Funcionario> salvar(@RequestBody @Valid Funcionario funcionario, UriComponentsBuilder uriBuilder) {
         this.service.salvar(funcionario);
+        URI uri = uriBuilder.path("/funcionario/{uuid}").buildAndExpand(funcionario.getUuid()).toUri();
+        return ResponseEntity.created(uri).body(funcionario);
     }
 
     @PutMapping("/{uuid}")
-    public void atualizarUUID(@RequestBody Funcionario funcionario, @PathVariable String uuid) {
+    public ResponseEntity<Funcionario> atualizarUUID(@RequestBody @Valid Funcionario funcionario, @PathVariable String uuid) {
         this.service.atualizarUUID(funcionario);
+        return ResponseEntity.ok(funcionario);
     }
 
     @DeleteMapping("/uuid/{uuid}")
-    public void deletarUUID(@PathVariable String uuid) {
+    public ResponseEntity<Funcionario> deletarUUID(@PathVariable String uuid) {
+
         this.service.deletarUUID(uuid);
+        return ResponseEntity.noContent().build();
     }
 }

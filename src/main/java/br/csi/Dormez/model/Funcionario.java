@@ -2,6 +2,9 @@ package br.csi.Dormez.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -25,12 +28,16 @@ public class Funcionario {
     @UuidGenerator
     private UUID uuid;
 
+    @NotBlank
     private String nome;
 
+    @Email(message = "Email inválido")
     private String email;
-
+    @NotBlank
+    //@Pattern(regexp = "\\(\\d{2}\\) \\d{4,5}-\\d{4}", message = "Telefone inválido")
     private String telefone;
 
+    @NotNull(message = "Cargo é obrigatório")
     @Enumerated(EnumType.STRING) // salva o nome do enum no DB
     private CargoEnum cargo;
 
