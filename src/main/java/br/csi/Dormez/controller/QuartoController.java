@@ -2,8 +2,12 @@ package br.csi.Dormez.controller;
 
 import br.csi.Dormez.model.Quarto;
 import br.csi.Dormez.service.QuartoService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -19,18 +23,21 @@ public class QuartoController {
     }
 
     @PostMapping()
-    public void salvar(@RequestBody Quarto quarto) {
-        service.salvar(quarto);
+    public ResponseEntity<Quarto> salvar(@RequestBody @Valid Quarto quarto, UriComponentsBuilder uriBuilder) {
+        this.service.salvar(quarto);
+        URI uri = uriBuilder.path("/quarto/{id}").buildAndExpand(quarto.getId()).toUri();
+        return ResponseEntity.created(uri).body(quarto);
     }
 
     @PutMapping("/{id}")
-    public void atualizar(@RequestBody Quarto quarto, @PathVariable Long id) {
-        service.atualizar(quarto, id);
+    public ResponseEntity<Quarto> atualizar(@RequestBody @Valid Quarto quarto, @PathVariable Long id) {
+        this.service.atualizar(quarto, id);
+        return ResponseEntity.ok().body(quarto);
     }
 
     @GetMapping("/id/{id}")
     public Quarto buscarPorId(@PathVariable Long id) {
-        return service.buscarPorId(id);
+        return this.service.buscarPorId(id);
     }
 
     @GetMapping("/numero/{numero}")
@@ -38,10 +45,10 @@ public class QuartoController {
         return service.buscarPorNumero(numero);
     }
 
-
-
     @DeleteMapping("/{id}")
-    public void deletar(@PathVariable Long id) {
-        service.deletar(id);
+    public ResponseEntity<Quarto> deletar(@PathVariable Long id) {
+
+        this.service.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 }
