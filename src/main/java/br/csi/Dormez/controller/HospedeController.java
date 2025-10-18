@@ -2,8 +2,12 @@ package br.csi.Dormez.controller;
 
 import br.csi.Dormez.model.Hospede;
 import br.csi.Dormez.service.HospedeService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,8 +25,10 @@ public class HospedeController {
     }
 
     @PostMapping
-    public void salvar(@RequestBody Hospede hospede) {
-        service.salvar(hospede);
+    public ResponseEntity<Hospede> salvar(@RequestBody @Valid Hospede hospede, UriComponentsBuilder uriBuilder) {
+        this.service.salvar(hospede);
+        URI uri = uriBuilder.path("/hospede/{uuid}").buildAndExpand(hospede.getUuid()).toUri();
+        return ResponseEntity.created(uri).body(hospede);
     }
 
     @GetMapping("/uuid/{uuid}")
@@ -41,13 +47,15 @@ public class HospedeController {
     }
 
     @PutMapping("/uuid/{uuid}")
-    public void atualizarUUID(@RequestBody Hospede hospede, @PathVariable String uuid) {
+    public ResponseEntity<Hospede> atualizarUUID(@RequestBody @Valid Hospede hospede, @PathVariable String uuid) {
         hospede.setUuid(UUID.fromString(uuid));
         this.service.atualizarUUID(hospede);
+        return ResponseEntity.ok(hospede);
     }
 
     @DeleteMapping("/uuid/{uuid}")
-    public void deletarPorUUID(@PathVariable String uuid) {
+    public ResponseEntity<Hospede> deletarPorUUID(@PathVariable String uuid) {
         this.service.deletarPorUUID(uuid);
+        return ResponseEntity.noContent().build();
     }
 }

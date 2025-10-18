@@ -9,6 +9,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/funcionario")
@@ -36,6 +37,7 @@ public class FuncionarioController {
 
     @PutMapping("/{uuid}")
     public ResponseEntity<Funcionario> atualizarUUID(@RequestBody @Valid Funcionario funcionario, @PathVariable String uuid) {
+        funcionario.setUuid(UUID.fromString(uuid));
         this.service.atualizarUUID(funcionario);
         return ResponseEntity.ok(funcionario);
     }

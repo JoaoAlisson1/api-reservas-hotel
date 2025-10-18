@@ -2,6 +2,8 @@ package br.csi.Dormez.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
@@ -23,8 +25,11 @@ public class Hospede { // avaliar código dps
     @Column(nullable = false, unique = true, updatable = false)
     private UUID uuid;
 
+    @NotBlank
     private String nome;
+    @Email(message = "Email inválido")
     private String email;
+    //@Pattern(regexp = "\\(\\d{2}\\) \\d{4,5}-\\d{4}", message = "Telefone inválido")
     private String telefone;
     private String cpf;
 
