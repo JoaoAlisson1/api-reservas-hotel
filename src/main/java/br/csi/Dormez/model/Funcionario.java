@@ -1,6 +1,7 @@
 package br.csi.Dormez.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 
+@Schema(description = "Entidade que representa um funcionário no sistema")
 public class Funcionario {
 
     @Id
@@ -26,6 +28,7 @@ public class Funcionario {
     private long id;
 
     @UuidGenerator
+
     private UUID uuid;
 
     @NotBlank
@@ -35,14 +38,17 @@ public class Funcionario {
     private String email;
     @NotBlank
     //@Pattern(regexp = "\\(\\d{2}\\) \\d{4,5}-\\d{4}", message = "Telefone inválido")
+    @Schema(description = "Telefone para contato", example = "(11) 91234-5678")
     private String telefone;
 
     @NotNull(message = "Cargo é obrigatório")
     @Enumerated(EnumType.STRING) // salva o nome do enum no DB
+    @Schema(description = "Cargo ocupado pelo funcionário", example = "RECEPCIONISTA")
     private CargoEnum cargo;
 
     @OneToMany(mappedBy = "funcionario")
     @JsonIgnore
+    @Schema(description = "Reservas associadas ao funcionário", hidden = true)
     private List<Reserva> reservas;
 
     //  Construtor personalizado para criação rápida
