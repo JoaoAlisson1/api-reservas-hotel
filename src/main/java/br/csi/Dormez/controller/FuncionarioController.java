@@ -54,7 +54,7 @@ public class FuncionarioController {
             @ApiResponse(responseCode = "201", description = "Funcionário criado com sucesso",
             content = @Content(mediaType = "application/json",
             schema = @Schema(implementation = Funcionario.class))),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos", content = @Content)
+            @ApiResponse(responseCode = "404", description = "Dados inválidos fornecidos", content = @Content)
     })
     public ResponseEntity<Funcionario> salvar(@RequestBody @Valid Funcionario funcionario, UriComponentsBuilder uriBuilder) {
         this.service.salvar(funcionario);
