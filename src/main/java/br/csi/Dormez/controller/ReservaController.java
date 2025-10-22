@@ -11,8 +11,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -50,7 +54,7 @@ public class ReservaController {
             @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos", content = @Content)
     })
     @PostMapping
-    public void salvar(@RequestBody ReservaDTO dto) {
+    public ResponseEntity<Reserva> salvar(@RequestBody @Valid ReservaDTO dto, UriComponentsBuilder uriBuilder) {
 
         Reserva reserva = new Reserva();
 
@@ -67,7 +71,11 @@ public class ReservaController {
         quarto.setId(dto.getQuartoId());
         reserva.setQuarto(quarto);
 
-        this.service.salvar(reserva, dto.getHospedeUUIDs());}
+        this.service.salvar(reserva, dto.getHospedeUUIDs());
+        URI uri = uriBuilder.path("/reserva/{uuid}").buildAndExpand(reserva.getUuid()).toUri();
+        return ResponseEntity.created(uri).body(reserva);
+
+    }
 
     @Operation(summary = "Atualizar reserva pelo UUID")
     @ApiResponses(value = {
@@ -78,7 +86,7 @@ public class ReservaController {
             @ApiResponse(responseCode = "404", description = "Reserva não encontrada", content = @Content)
     })
     @PutMapping("/{uuid}")
-    public void atualizarUUID(@RequestBody ReservaDTO dto, @PathVariable String uuid) {
+    public ResponseEntity<Reserva> atualizarUUID(@RequestBody @Valid ReservaDTO dto, @PathVariable String uuid) {
 
         Reserva reserva = new Reserva();
 
@@ -98,7 +106,10 @@ public class ReservaController {
         reserva.setQuarto(quarto);
 
         // Passa a reserva e a lista de hospede UUIDs para o service
-        this.service.atualizarUUID(reserva, dto.getHospedeUUIDs());}
+        this.service.atualizarUUID(reserva, dto.getHospedeUUIDs());
+
+        return ResponseEntity.ok(reserva);
+    }
 
     @Operation(summary = "Excluir reserva pelo UUID")
     @ApiResponses(value = {

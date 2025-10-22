@@ -1,5 +1,7 @@
 package br.csi.Dormez.DTO;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,11 +18,17 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ReservaDTO {
 
+    @NotNull
     private LocalDateTime checkIn;
+    @NotNull
     private LocalDateTime checkOut;
+    @NotNull
     private BigDecimal valorTotal;
+    @NotBlank
     private String status;
+    @NotNull
     private Long funcionarioId;
+    @NotNull
     private Long quartoId;
-    private List<UUID> hospedeUUIDs;
+    private List<@NotNull(message = "UUID do hóspede não pode ser nulo")UUID> hospedeUUIDs;
 }
