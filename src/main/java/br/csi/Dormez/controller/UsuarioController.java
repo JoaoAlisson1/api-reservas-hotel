@@ -3,7 +3,6 @@ package br.csi.Dormez.controller;
 import br.csi.Dormez.DTO.DadosUsuario;
 import br.csi.Dormez.model.Usuario;
 import br.csi.Dormez.service.UsuarioService;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
