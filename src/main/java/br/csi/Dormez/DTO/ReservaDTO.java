@@ -22,8 +22,6 @@ public class ReservaDTO {
     private LocalDateTime checkIn;
     @NotNull
     private LocalDateTime checkOut;
-    @NotNull
-    private BigDecimal valorTotal;
     @NotBlank
     private String status;
     @NotNull
