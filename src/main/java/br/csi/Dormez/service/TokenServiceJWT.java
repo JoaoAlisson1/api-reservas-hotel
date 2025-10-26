@@ -3,6 +3,7 @@ package br.csi.Dormez.service;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
@@ -30,5 +31,18 @@ public class TokenServiceJWT {
 
     private Instant dataExpiracao() {
         return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
+    }
+
+    public String getSubject(String token) {
+        try{
+            Algorithm algorithm = Algorithm.HMAC256("POO2");
+            return JWT.require(algorithm)
+                    .withIssuer("API Reservas Quartos")
+                    .build()
+                    .verify(token)
+                    .getSubject();
+        } catch (JWTVerificationException e) {
+            throw new RuntimeException("Token inválido ou expirado");
+        }
     }
 }
