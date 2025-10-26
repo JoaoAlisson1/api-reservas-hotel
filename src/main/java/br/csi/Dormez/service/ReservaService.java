@@ -1,7 +1,9 @@
 package br.csi.Dormez.service;
 
 import br.csi.Dormez.model.Hospede;
+import br.csi.Dormez.model.Quarto;
 import br.csi.Dormez.model.Reserva;
+import br.csi.Dormez.model.StatusQuarto;
 import br.csi.Dormez.repository.HospedeRepository;
 import br.csi.Dormez.repository.ReservaRepository;
 import org.springframework.stereotype.Service;
@@ -10,11 +12,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 public class ReservaService {
+
+    private static final EnumSet<StatusQuarto> STATUS_INDISPONIVEIS =
+            EnumSet.of(StatusQuarto.Ocupado, StatusQuarto.Reservado, StatusQuarto.Manutenção,
+                    StatusQuarto.Limpeza,StatusQuarto.Indisponível);
 
     private final ReservaRepository repository;
     private final HospedeRepository hospedeRepository;
@@ -24,7 +31,11 @@ public class ReservaService {
         this.hospedeRepository = hospedeRepository;
     }
 
+    @Transactional
     public void salvar(Reserva reserva, List<UUID> hospedeUUIDs  ) {
+
+        validarDisponibilidadeQuarto(reserva.getQuarto());
+
         List<Hospede> hospedes = hospedeRepository.findAllByUuidIn(hospedeUUIDs);
         reserva.setHospedes(hospedes);
 
@@ -47,13 +58,14 @@ public class ReservaService {
         this.repository.deleteReservaByUuid(UUID.fromString(uuid));
     }
 
-
+    @Transactional
     public void atualizarUUID(Reserva reserva, List<UUID> hospedeUUIDs ) {
+
+        validarDisponibilidadeQuarto(reserva.getQuarto());
 
         Reserva reserv = this.repository.findReservaByUuid(reserva.getUuid());
         reserv.setCheckIn(reserva.getCheckIn());
         reserv.setCheckOut(reserva.getCheckOut());
-        reserv.setValorTotal(reserva.getValorTotal());
         reserv.setStatus(reserva.getStatus());
         reserv.setFuncionario(reserva.getFuncionario());
         reserv.setQuarto(reserva.getQuarto());
@@ -66,6 +78,13 @@ public class ReservaService {
         reserv.setValorTotal(valorTotal);
 
         this.repository.save(reserv);
+    }
+
+    private void validarDisponibilidadeQuarto(Quarto quarto) {
+
+        if(STATUS_INDISPONIVEIS.contains(quarto.getStatus())) {
+            throw new RuntimeException("Quarto " + quarto.getNumero() + " não disponível para reserva. Status: " + quarto.getStatus());
+        }
     }
 
     private BigDecimal calcularValorTotal(LocalDateTime checkIn, LocalDateTime checkOut, BigDecimal diaria) {
