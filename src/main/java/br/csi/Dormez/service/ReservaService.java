@@ -63,7 +63,7 @@ public class ReservaService {
 
         // Recalcula valor total
         BigDecimal valorTotal = calcularValorTotal(reserva.getCheckIn(), reserva.getCheckOut(), reserva.getQuarto().getDiaria());
-        reserv.setValorTotal(valorTotal); //oberservar
+        reserv.setValorTotal(valorTotal);
 
         this.repository.save(reserv);
     }
@@ -74,11 +74,12 @@ public class ReservaService {
             throw new IllegalArgumentException("A data de check-out não pode ser anterior à data de check-in.");
         }
 
-        long dias = java.time.Duration.between(checkIn, checkOut).toDays();
+        long dias = java.time.temporal.ChronoUnit.DAYS.between(checkIn.toLocalDate(), checkOut.toLocalDate());
 
-        if(dias == 0) { // Garante no mínimo 1 diária
+        if (dias <= 0) { // Garante no mínimo 1 diária
             dias = 1;
         }
+
 
         return diaria.multiply(BigDecimal.valueOf(dias)).setScale(2, RoundingMode.HALF_UP);
     }
