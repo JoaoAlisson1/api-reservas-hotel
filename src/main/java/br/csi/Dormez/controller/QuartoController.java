@@ -1,5 +1,8 @@
 package br.csi.Dormez.controller;
 
+import br.csi.Dormez.DTO.QuartoRequestDTO;
+import br.csi.Dormez.DTO.QuartoResponseDTO;
+import br.csi.Dormez.DTO.mapper.QuartoMapper;
 import br.csi.Dormez.model.Quarto;
 import br.csi.Dormez.service.QuartoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,7 +24,7 @@ import java.util.List;
 @Tag(name = "Quartos", description = "Path relacionado a operações de quarto")
 public class QuartoController {
 
-    private QuartoService service;
+    private  final QuartoService service;
     public QuartoController(QuartoService service) {this.service = service;}
 
     @Operation(summary = "Listar todos os quartos")
@@ -31,8 +34,8 @@ public class QuartoController {
             schema = @Schema(implementation = Quarto.class))),
     })
     @GetMapping("/listar")
-    public List<Quarto> listar() {
-        return service.listar();
+    public List<QuartoResponseDTO> listar() {
+        return this.service.listar().stream().map(QuartoMapper::toResponseDTO).toList();
     }
 
     @Operation(summary = "Criar um novo quarto", description = "Cria um novo quarto e o adiciona a lista")
@@ -43,10 +46,12 @@ public class QuartoController {
             @ApiResponse(responseCode = "404", description = "Dados inválidos fornecidos", content = @Content)
     })
     @PostMapping()
-    public ResponseEntity<Quarto> salvar(@RequestBody @Valid Quarto quarto, UriComponentsBuilder uriBuilder) {
-        this.service.salvar(quarto);
+    public ResponseEntity<QuartoResponseDTO> salvar(@RequestBody @Valid QuartoRequestDTO dto, UriComponentsBuilder uriBuilder) {
+        Quarto quarto = this.service.salvar(QuartoMapper.toEntity(dto));
+        QuartoResponseDTO response = QuartoMapper.toResponseDTO(quarto);
         URI uri = uriBuilder.path("/quarto/{id}").buildAndExpand(quarto.getId()).toUri();
-        return ResponseEntity.created(uri).body(quarto);
+
+        return ResponseEntity.created(uri).body(response);
     }
 
     @Operation(summary = "Atualizar quarto pelo ID")
@@ -58,9 +63,15 @@ public class QuartoController {
             @ApiResponse(responseCode = "404", description = "Quarto não encontrado", content = @Content)
     })
     @PutMapping("/{id}")
-    public ResponseEntity<Quarto> atualizar(@RequestBody @Valid Quarto quarto, @PathVariable Long id) {
-        this.service.atualizar(quarto, id);
-        return ResponseEntity.ok().body(quarto);
+    public ResponseEntity<QuartoResponseDTO> atualizar(@RequestBody @Valid QuartoRequestDTO dto, @PathVariable Long id) {
+        Quarto quarto = QuartoMapper.toEntity(dto);
+        Quarto atualizado = service.atualizar(quarto, id);
+
+        if (atualizado == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(QuartoMapper.toResponseDTO(atualizado));
     }
 
     @Operation(summary = "Buscar quarto por ID")
@@ -71,8 +82,14 @@ public class QuartoController {
             @ApiResponse(responseCode = "404", description = "Quarto não encontrado", content = @Content)
     })
     @GetMapping("/id/{id}")
-    public Quarto buscarPorId(@PathVariable Long id) {
-        return this.service.buscarPorId(id);
+    public ResponseEntity<QuartoResponseDTO> buscarPorId(@PathVariable Long id) {
+        Quarto quarto = this.service.buscarPorId(id);
+
+        if (quarto == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(QuartoMapper.toResponseDTO(quarto));
     }
 
 
@@ -84,8 +101,14 @@ public class QuartoController {
             @ApiResponse(responseCode = "404", description = "Quarto não encontrado", content = @Content)
     })
     @GetMapping("/numero/{numero}")
-    public Quarto buscarPorNumero(@PathVariable int numero) {
-        return service.buscarPorNumero(numero);
+    public ResponseEntity <QuartoResponseDTO> buscarPorNumero(@PathVariable int numero) {
+        Quarto quarto = this.service.buscarPorNumero(numero);
+
+        if (quarto == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(QuartoMapper.toResponseDTO(quarto));
     }
 
     @Operation(summary = "Excluir quarto pelo ID")
@@ -94,9 +117,15 @@ public class QuartoController {
             @ApiResponse(responseCode = "404", description = "Quarto não encontrado", content = @Content)
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Quarto> deletar(@PathVariable Long id) {
+    public ResponseEntity<QuartoResponseDTO> deletar(@PathVariable Long id) {
+
+        Quarto quarto = this.service.buscarPorId(id);
+
+        if (quarto == null) {
+            return ResponseEntity.notFound().build();
+        }
 
         this.service.deletar(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build(); // 204 No Content
     }
 }
