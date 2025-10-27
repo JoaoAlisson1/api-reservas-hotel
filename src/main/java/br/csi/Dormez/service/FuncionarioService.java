@@ -15,8 +15,8 @@ public class FuncionarioService {
 
     public FuncionarioService(FuncionarioRepository repository) {this.repository = repository;}
 
-    public void salvar(Funcionario funcionario) {
-        this.repository.save(funcionario);
+    public Funcionario salvar(Funcionario funcionario) {
+        return this.repository.save(funcionario);
     }
 
     public List<Funcionario> listar() {
@@ -33,13 +33,18 @@ public class FuncionarioService {
         this.repository.deleteFuncionarioByUuid(UUID.fromString(uuid));
     }
 
-    public void atualizarUUID(Funcionario funcionario) {
+    public Funcionario atualizarUUID(Funcionario funcionario) {
 
         Funcionario func = this.repository.findFuncionarioByUuid(funcionario.getUuid());
-        func.setNome(funcionario.getNome());
-        func.setEmail(funcionario.getEmail());
-        func.setTelefone(funcionario.getTelefone());
-        func.setCargo(funcionario.getCargo());
-        this.repository.save(func);
+        if (func != null) {
+            func.setNome(funcionario.getNome());
+            func.setEmail(funcionario.getEmail());
+            func.setTelefone(funcionario.getTelefone());
+            func.setCargo(funcionario.getCargo());
+
+            return this.repository.save(func); // Retorna a entidade atualizada
+        }
+
+        return null;
     }
 }

@@ -1,5 +1,8 @@
 package br.csi.Dormez.controller;
 
+import br.csi.Dormez.DTO.FuncionarioRequestDTO;
+import br.csi.Dormez.DTO.FuncionarioResponseDTO;
+import br.csi.Dormez.DTO.mapper.FuncionarioMapper;
 import br.csi.Dormez.model.Funcionario;
 import br.csi.Dormez.service.FuncionarioService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,7 +25,7 @@ import java.util.UUID;
 @Tag(name = "Funcionários", description = "Path relacionado a operações de funcionários")
 public class FuncionarioController {
 
-    private FuncionarioService service;
+    private  final FuncionarioService service;
     public FuncionarioController(FuncionarioService service) {this.service = service;}
 
     @Operation(summary = "Listar todos os funcionários")
@@ -32,8 +35,8 @@ public class FuncionarioController {
                 schema = @Schema(implementation = Funcionario.class))),
     })
     @GetMapping("/listar")
-    public List<Funcionario> listar() {
-        return service.listar();
+    public List<FuncionarioResponseDTO> listar() {
+        return service.listar().stream().map(FuncionarioMapper::toResponseDTO).toList();
     }
 
     @Operation(summary = "Buscar funcionário por UUID")
@@ -44,8 +47,17 @@ public class FuncionarioController {
             @ApiResponse(responseCode = "404", description = "Funcionário não encontrado", content = @Content)
     })
     @GetMapping("/uuid/{uuid}")
-    public Funcionario funcionario(@PathVariable String uuid) {
-        return this.service.buscarPorUUID(uuid);
+    public ResponseEntity<FuncionarioResponseDTO> buscarPorUUID(@PathVariable String uuid) {
+        //Busca a entidade Funcionario pelo UUID usando o service
+        Funcionario funcionario = service.buscarPorUUID(uuid);
+
+        if (funcionario == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Converte a entidade para DTO para não expor diretamente o modelo
+        FuncionarioResponseDTO responseDTO = FuncionarioMapper.toResponseDTO(funcionario);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @PostMapping()
@@ -54,12 +66,15 @@ public class FuncionarioController {
             @ApiResponse(responseCode = "201", description = "Funcionário criado com sucesso",
             content = @Content(mediaType = "application/json",
             schema = @Schema(implementation = Funcionario.class))),
-            @ApiResponse(responseCode = "404", description = "Dados inválidos fornecidos", content = @Content)
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos", content = @Content)
     })
-    public ResponseEntity<Funcionario> salvar(@RequestBody @Valid Funcionario funcionario, UriComponentsBuilder uriBuilder) {
-        this.service.salvar(funcionario);
+    public ResponseEntity<FuncionarioResponseDTO> salvar(@RequestBody @Valid FuncionarioRequestDTO dto, UriComponentsBuilder uriBuilder) {
+        Funcionario funcionario = this.service.salvar(FuncionarioMapper.toEntity(dto)); // converte o DTO em entidade direto dentro do método
+        FuncionarioResponseDTO response = FuncionarioMapper.toResponseDTO(funcionario);
+
         URI uri = uriBuilder.path("/funcionario/{uuid}").buildAndExpand(funcionario.getUuid()).toUri();
-        return ResponseEntity.created(uri).body(funcionario);
+
+        return ResponseEntity.created(uri).body(response);
     }
 
     @Operation(summary = "Atualizar funcionário pelo UUID")
@@ -67,15 +82,22 @@ public class FuncionarioController {
             @ApiResponse(responseCode = "200", description = "Funcionário atualizado com sucesso",
                 content = @Content(mediaType = "application/json",
                 schema = @Schema(implementation = Funcionario.class))),
-            @ApiResponse(responseCode = "404", description = "Dados inválidos", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos", content = @Content),
             @ApiResponse(responseCode = "404", description = "Funcionário não encontrado", content = @Content)
     })
 
     @PutMapping("/{uuid}")
-    public ResponseEntity<Funcionario> atualizarUUID(@RequestBody @Valid Funcionario funcionario, @PathVariable String uuid) {
+    public ResponseEntity<FuncionarioResponseDTO> atualizarUUID(@RequestBody @Valid FuncionarioRequestDTO dto, @PathVariable String uuid) {
+        Funcionario funcionario = FuncionarioMapper.toEntity(dto);
         funcionario.setUuid(UUID.fromString(uuid));
-        this.service.atualizarUUID(funcionario);
-        return ResponseEntity.ok(funcionario);
+
+        Funcionario atualizado = service.atualizarUUID(funcionario);
+
+        if (atualizado == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(FuncionarioMapper.toResponseDTO(atualizado));
     }
 
     @Operation(summary = "Excluir funcionário pelo UUID")
@@ -85,7 +107,12 @@ public class FuncionarioController {
     })
 
     @DeleteMapping("/uuid/{uuid}")
-    public ResponseEntity<Funcionario> deletarUUID(@PathVariable String uuid) {
+    public ResponseEntity<Void> deletarUUID(@PathVariable String uuid) {
+        Funcionario funcionario = this.service.buscarPorUUID(uuid);
+
+        if (funcionario == null) {
+            return ResponseEntity.notFound().build();
+        }
 
         this.service.deletarUUID(uuid);
         return ResponseEntity.noContent().build();
