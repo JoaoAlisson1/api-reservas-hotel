@@ -28,22 +28,16 @@ public class Funcionario {
     private long id;
 
     @UuidGenerator
-
     private UUID uuid;
 
-    @NotBlank
     private String nome;
 
-    @Email(message = "Email inválido")
     private String email;
-    @NotBlank
-    //@Pattern(regexp = "\\(\\d{2}\\) \\d{4,5}-\\d{4}", message = "Telefone inválido")
-    @Schema(description = "Telefone para contato", example = "(11) 91234-5678")
+
     private String telefone;
 
-    @NotNull(message = "Cargo é obrigatório")
     @Enumerated(EnumType.STRING) // salva o nome do enum no DB
-    @Schema(description = "Cargo ocupado pelo funcionário", example = "RECEPCIONISTA")
+
     private CargoEnum cargo;
 
     @OneToMany(mappedBy = "funcionario")
