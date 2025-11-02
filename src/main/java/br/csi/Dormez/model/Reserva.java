@@ -11,6 +11,7 @@ import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,7 +54,7 @@ public class Reserva {
             inverseJoinColumns = @JoinColumn(name = "hospede_id")
     )
     @Schema(description = "Lista de hóspedes associados à reserva.")
-    private List<Hospede> hospedes;
+    private List<Hospede> hospedes =  new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "quarto_id")

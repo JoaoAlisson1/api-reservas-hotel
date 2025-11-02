@@ -1,6 +1,8 @@
 package br.csi.Dormez.controller;
 
-import br.csi.Dormez.DTO.ReservaDTO;
+import br.csi.Dormez.DTO.ReservaRequestDTO;
+import br.csi.Dormez.DTO.ReservaResponseDTO;
+import br.csi.Dormez.DTO.mapper.ReservaMapper;
 import br.csi.Dormez.model.Funcionario;
 import br.csi.Dormez.model.Quarto;
 import br.csi.Dormez.model.Reserva;
@@ -20,6 +22,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/reserva")
@@ -44,8 +47,8 @@ public class ReservaController {
                             schema = @Schema(implementation = Reserva.class))),
     })
     @GetMapping("/listar")
-    public List<Reserva> listar() {
-        return service.listar();
+    public List<ReservaResponseDTO> listar() {
+        return service.listar().stream().map(ReservaMapper::toDTO).toList();
     }
 
     @Operation(summary = "Buscar reserva por UUID")
@@ -56,8 +59,14 @@ public class ReservaController {
             @ApiResponse(responseCode = "404", description = "Reserva não encontrada", content = @Content)
     })
     @GetMapping("/uuid/{uuid}")
-    public Reserva reserva(@PathVariable String uuid) {
-        return this.service.buscarPorUUID(uuid);
+    public ResponseEntity<ReservaResponseDTO> buscarPorUUID(@PathVariable String uuid) {
+        Reserva reserva = this.service.buscarPorUUID(uuid);
+
+        if(reserva == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(ReservaMapper.toDTO(reserva));
     }
 
     @Operation(summary = "Criar uma nova reserva")
@@ -68,29 +77,28 @@ public class ReservaController {
             @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos", content = @Content)
     })
     @PostMapping
-    public ResponseEntity<Reserva> salvar(@RequestBody @Valid ReservaDTO dto, UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<ReservaResponseDTO> salvar(@RequestBody @Valid ReservaRequestDTO dto, UriComponentsBuilder uriBuilder) {
 
         // Buscar quarto real
         Quarto quarto = quartoRepository.findById(dto.getQuartoId())
                 .orElseThrow(() -> new RuntimeException("Quarto não encontrado"));
 
         // Buscar funcionário real
-        Funcionario func = funcionarioRepository.findById(dto.getFuncionarioId())
+        Funcionario funcionario = funcionarioRepository.findById(dto.getFuncionarioId())
                 .orElseThrow(() -> new RuntimeException("Funcionário não encontrado"));
 
-        // Criar reserva
-        Reserva reserva = new Reserva();
-        reserva.setCheckIn(dto.getCheckIn());
-        reserva.setCheckOut(dto.getCheckOut());
-        reserva.setStatus(Enum.valueOf(br.csi.Dormez.model.StatusReserva.class, dto.getStatus()));
-        reserva.setQuarto(quarto);
-        reserva.setFuncionario(func);
+        // Mapeia DTO -> Entidade
+        Reserva reserva = ReservaMapper.toEntity(dto, funcionario, quarto, null);
 
-        // Salvar reserva com hóspedes
-        service.salvar(reserva, dto.getHospedeUUIDs());
+        // Salva com hóspedes
+        this.service.salvar(reserva, dto.getHospedeUUIDs());
 
-        URI uri = uriBuilder.path("/reserva/uuid/{uuid}").buildAndExpand(reserva.getUuid()).toUri();
-        return ResponseEntity.created(uri).body(reserva);
+        Reserva reservaAtualizada = service.buscarPorUUID(reserva.getUuid().toString());
+
+        URI uri = uriBuilder.path("/reserva/uuid/{uuid}")
+                .buildAndExpand(reservaAtualizada.getUuid()).toUri();
+
+        return ResponseEntity.created(uri).body(ReservaMapper.toDTO(reservaAtualizada));
     }
 
     @Operation(summary = "Atualizar reserva pelo UUID")
@@ -102,29 +110,26 @@ public class ReservaController {
             @ApiResponse(responseCode = "404", description = "Reserva não encontrada", content = @Content)
     })
     @PutMapping("/uuid/{uuid}")
-    public ResponseEntity<Reserva> atualizarUUID(@RequestBody @Valid ReservaDTO dto, @PathVariable String uuid) {
+    public ResponseEntity<ReservaResponseDTO> atualizarUUID(@RequestBody @Valid ReservaRequestDTO dto, @PathVariable String uuid) {
 
         // Buscar quarto real
         Quarto quarto = quartoRepository.findById(dto.getQuartoId())
                 .orElseThrow(() -> new RuntimeException("Quarto não encontrado"));
 
         // Buscar funcionário real
-        Funcionario func = funcionarioRepository.findById(dto.getFuncionarioId())
+        Funcionario funcionario = funcionarioRepository.findById(dto.getFuncionarioId())
                 .orElseThrow(() -> new RuntimeException("Funcionário não encontrado"));
 
-        // Criar reserva temporária para atualização
-        Reserva reserva = new Reserva();
-        reserva.setUuid(java.util.UUID.fromString(uuid));
-        reserva.setCheckIn(dto.getCheckIn());
-        reserva.setCheckOut(dto.getCheckOut());
-        reserva.setStatus(Enum.valueOf(br.csi.Dormez.model.StatusReserva.class, dto.getStatus()));
-        reserva.setQuarto(quarto);
-        reserva.setFuncionario(func);
+        Reserva reserva = ReservaMapper.toEntity(dto, funcionario, quarto, null);
+        reserva.setUuid(UUID.fromString(uuid));
 
         // Atualizar reserva com hóspedes
-        service.atualizarUUID(reserva, dto.getHospedeUUIDs());
+        this.service.atualizarUUID(reserva, dto.getHospedeUUIDs());
 
-        return ResponseEntity.ok(reserva);
+        // Busca a reserva atualizada no banco
+        Reserva reservaAtualizada = service.buscarPorUUID(uuid);
+
+        return ResponseEntity.ok(ReservaMapper.toDTO(reservaAtualizada));
     }
 
     @Operation(summary = "Excluir reserva pelo UUID")
@@ -133,8 +138,16 @@ public class ReservaController {
             @ApiResponse(responseCode = "404", description = "Reserva não encontrado", content = @Content)
     })
     @DeleteMapping("/uuid/{uuid}")
-    public void deletarUUID(@PathVariable String uuid) {
+    public ResponseEntity deletarUUID(@PathVariable String uuid) {
+        Reserva reserva =  service.buscarPorUUID(uuid);
+
+        if (reserva == null) {
+            return ResponseEntity.notFound().build();
+        }
+
         this.service.deletarUUID(uuid);
+        return ResponseEntity.noContent().build();
+
     }
 
 }
