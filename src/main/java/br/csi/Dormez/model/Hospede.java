@@ -3,8 +3,6 @@ package br.csi.Dormez.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
@@ -27,16 +25,12 @@ public class Hospede {
     @Column(nullable = false, unique = true, updatable = false)
     private UUID uuid;
 
-    @NotBlank
-    @Schema(description = "Nome completo do hóspede", example = "Carlos Freitas")
     private String nome;
-    @Email(message = "Email inválido")
-    @Schema(description = "Email válido do hóspede", example = "carlos@email.com")
+
     private String email;
-    //@Pattern(regexp = "\\(\\d{2}\\) \\d{4,5}-\\d{4}", message = "Telefone inválido")
-    @Schema(description = "Telefone de contato do hóspede", example = "(11) 91234-5678")
+
     private String telefone;
-    @Schema(description = "CPF do hóspede", example = "123.456.789-00")
+
     private String cpf;
 
     @ManyToMany(mappedBy = "hospedes")
