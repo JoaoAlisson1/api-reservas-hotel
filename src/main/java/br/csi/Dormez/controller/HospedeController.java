@@ -3,6 +3,8 @@ package br.csi.Dormez.controller;
 import br.csi.Dormez.DTO.HospedeRequestDTO;
 import br.csi.Dormez.DTO.HospedeResponseDTO;
 import br.csi.Dormez.DTO.mapper.HospedeMapper;
+import br.csi.Dormez.infra.RecursoNaoEncontradoException;
+import br.csi.Dormez.infra.TratadorDeErros;
 import br.csi.Dormez.model.Hospede;
 import br.csi.Dormez.service.HospedeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,14 +66,19 @@ public class HospedeController {
     })
     @GetMapping("/uuid/{uuid}")
     public ResponseEntity <HospedeResponseDTO> buscarPorUUID(@PathVariable String uuid) {
-        Hospede hospede = this.service.buscarPorUUID(uuid);
-
-        if (hospede == null) {
-            return ResponseEntity.notFound().build(); // Retorna 404 se não encontrado
+        UUID uuidObj;
+        try {
+            uuidObj = UUID.fromString(uuid); // valida formato do UUID
+        } catch (IllegalArgumentException e) {
+            throw new RecursoNaoEncontradoException("UUID inválido.");
         }
 
-        HospedeResponseDTO responseDTO = HospedeMapper.toResponseDTO(hospede);
-        return ResponseEntity.ok(responseDTO); // Retorna 200 OK com o DTO
+        Hospede hospede = this.service.buscarPorUUID(uuidObj.toString());
+        if (hospede == null) {
+            throw new RecursoNaoEncontradoException("Hospede não encontrado.");
+        }
+
+        return ResponseEntity.ok(HospedeMapper.toResponseDTO(hospede));
     }
 
     @Operation(summary = "Buscar hospede por nome")
@@ -86,7 +93,7 @@ public class HospedeController {
         Hospede hospede =  this.service.buscarPorNome(nome);
 
         if (hospede == null) {
-            return ResponseEntity.notFound().build();
+            throw new RecursoNaoEncontradoException("Hospede não encontrado.");
         }
 
         return ResponseEntity.ok(HospedeMapper.toResponseDTO(hospede));
@@ -104,7 +111,7 @@ public class HospedeController {
         Hospede hospede = this.service.buscarPorCpf(cpf);
 
         if (hospede == null) {
-            return ResponseEntity.notFound().build();
+            throw new RecursoNaoEncontradoException("Hospede não encontrado.");
         }
 
         return ResponseEntity.ok(HospedeMapper.toResponseDTO(hospede));
@@ -119,11 +126,15 @@ public class HospedeController {
             @ApiResponse(responseCode = "404", description = "Hospede não encontrado", content = @Content)
     })
     @PutMapping("/uuid/{uuid}")
-    public ResponseEntity<HospedeResponseDTO> atualizarUUID(@RequestBody @Valid HospedeRequestDTO dto, @PathVariable String uuid) {
+    public ResponseEntity<TratadorDeErros.MensagemSucesso> atualizarUUID(@RequestBody @Valid HospedeRequestDTO dto, @PathVariable String uuid) {
         Hospede hospede = HospedeMapper.toEntity(dto);
         hospede.setUuid(UUID.fromString(uuid));
         Hospede atualizado = this.service.atualizarUUID(hospede);
-        return ResponseEntity.ok(HospedeMapper.toResponseDTO(atualizado));
+
+        if (atualizado == null) {
+            throw new RecursoNaoEncontradoException("Hospede não encontrado.");
+        }
+        return ResponseEntity.ok(new TratadorDeErros.MensagemSucesso("Hospede atualizado com sucesso!"));
     }
 
     @Operation(summary = "Excluir Hospede pelo UUID")
@@ -132,15 +143,15 @@ public class HospedeController {
             @ApiResponse(responseCode = "404", description = "Hospede não encontrado")
     })
     @DeleteMapping("/uuid/{uuid}")
-    public ResponseEntity<Hospede> deletarPorUUID(@PathVariable String uuid) {
+    public ResponseEntity<TratadorDeErros.MensagemSucesso> deletarPorUUID(@PathVariable String uuid) {
         Hospede hospede = service.buscarPorUUID(uuid);
 
         if (hospede == null) {
-            return ResponseEntity.notFound().build(); // 404 se não encontrado
+            throw new RecursoNaoEncontradoException("Hospede não encontrado.");
         }
 
         this.service.deletarPorUUID(uuid);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(new TratadorDeErros.MensagemSucesso("Hospede excluído com sucesso!"));
     }
 }
