@@ -1,10 +1,12 @@
 package br.csi.Dormez.service;
 
 import br.csi.Dormez.DTO.DadosUsuario;
+import br.csi.Dormez.infra.RecursoNaoEncontradoException;
 import br.csi.Dormez.model.Usuario;
 import br.csi.Dormez.repository.UsuarioRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,11 +26,33 @@ public class UsuarioService {
     }
 
     public DadosUsuario findUsuario(Long id) {
-        Usuario usuario = this.repository.getReferenceById(id);
+        Usuario usuario = repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado."));
         return new DadosUsuario(usuario);
     }
 
-    public List<DadosUsuario> findAll() {
+    public List<DadosUsuario> listar() {
         return this.repository.findAll().stream().map(DadosUsuario::new).toList();
     }
+
+    @Transactional
+    public void deletar(Long id) {
+        Usuario usuario = repository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado."));
+        repository.delete(usuario);
+    }
+
+    public Usuario atualizar(Long id, Usuario usuarioAtualizado) {
+        Usuario usuario = repository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado."));
+
+        usuario.setLogin(usuarioAtualizado.getLogin());
+        usuario.setPermissao(usuarioAtualizado.getPermissao());
+
+        if (usuarioAtualizado.getSenha() != null && !usuarioAtualizado.getSenha().isBlank()) {
+            usuario.setSenha(new BCryptPasswordEncoder().encode(usuarioAtualizado.getSenha()));
+        }
+
+        return repository.save(usuario);
+    }
+
 }
