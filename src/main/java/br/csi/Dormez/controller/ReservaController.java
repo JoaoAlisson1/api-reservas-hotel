@@ -3,11 +3,8 @@ package br.csi.Dormez.controller;
 import br.csi.Dormez.DTO.ReservaRequestDTO;
 import br.csi.Dormez.DTO.ReservaResponseDTO;
 import br.csi.Dormez.DTO.mapper.ReservaMapper;
-import br.csi.Dormez.model.Funcionario;
-import br.csi.Dormez.model.Quarto;
+import br.csi.Dormez.infra.TratadorDeErros;
 import br.csi.Dormez.model.Reserva;
-import br.csi.Dormez.repository.FuncionarioRepository;
-import br.csi.Dormez.repository.QuartoRepository;
 import br.csi.Dormez.service.ReservaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,14 +27,11 @@ import java.util.UUID;
 public class ReservaController {
 
     private final ReservaService service;
-    private final QuartoRepository quartoRepository;
-    private final FuncionarioRepository funcionarioRepository;
 
-    public ReservaController(ReservaService service, QuartoRepository quartoRepository,
-                             FuncionarioRepository funcionarioRepository) {
+
+    public ReservaController(ReservaService service) {
         this.service = service;
-        this.quartoRepository = quartoRepository;
-        this.funcionarioRepository = funcionarioRepository;
+
     }
 
     @Operation(summary = "Listar todas as reservas")
@@ -62,10 +56,6 @@ public class ReservaController {
     public ResponseEntity<ReservaResponseDTO> buscarPorUUID(@PathVariable String uuid) {
         Reserva reserva = this.service.buscarPorUUID(uuid);
 
-        if(reserva == null) {
-            return ResponseEntity.notFound().build();
-        }
-
         return ResponseEntity.ok(ReservaMapper.toDTO(reserva));
     }
 
@@ -79,26 +69,16 @@ public class ReservaController {
     @PostMapping
     public ResponseEntity<ReservaResponseDTO> salvar(@RequestBody @Valid ReservaRequestDTO dto, UriComponentsBuilder uriBuilder) {
 
-        // Buscar quarto real
-        Quarto quarto = quartoRepository.findById(dto.getQuartoId())
-                .orElseThrow(() -> new RuntimeException("Quarto não encontrado"));
+        var quarto = service.buscarQuarto(dto.getQuartoId());
+        var funcionario = service.buscarFuncionario(dto.getFuncionarioId());
 
-        // Buscar funcionário real
-        Funcionario funcionario = funcionarioRepository.findById(dto.getFuncionarioId())
-                .orElseThrow(() -> new RuntimeException("Funcionário não encontrado"));
-
-        // Mapeia DTO -> Entidade
         Reserva reserva = ReservaMapper.toEntity(dto, funcionario, quarto, null);
-
-        // Salva com hóspedes
-        this.service.salvar(reserva, dto.getHospedeUUIDs());
-
-        Reserva reservaAtualizada = service.buscarPorUUID(reserva.getUuid().toString());
+        Reserva reservaSalva = service.salvar(reserva, dto.getHospedeUUIDs());
 
         URI uri = uriBuilder.path("/reserva/uuid/{uuid}")
-                .buildAndExpand(reservaAtualizada.getUuid()).toUri();
+                .buildAndExpand(reservaSalva.getUuid()).toUri();
 
-        return ResponseEntity.created(uri).body(ReservaMapper.toDTO(reservaAtualizada));
+        return ResponseEntity.created(uri).body(ReservaMapper.toDTO(reservaSalva));
     }
 
     @Operation(summary = "Atualizar reserva pelo UUID")
@@ -110,26 +90,19 @@ public class ReservaController {
             @ApiResponse(responseCode = "404", description = "Reserva não encontrada", content = @Content)
     })
     @PutMapping("/uuid/{uuid}")
-    public ResponseEntity<ReservaResponseDTO> atualizarUUID(@RequestBody @Valid ReservaRequestDTO dto, @PathVariable String uuid) {
+    public ResponseEntity<TratadorDeErros.MensagemSucesso> atualizarUUID(@RequestBody @Valid ReservaRequestDTO dto, @PathVariable String uuid) {
+        // Busca entidades relacionadas
+        var quarto = service.buscarQuarto(dto.getQuartoId());
+        var funcionario = service.buscarFuncionario(dto.getFuncionarioId());
 
-        // Buscar quarto real
-        Quarto quarto = quartoRepository.findById(dto.getQuartoId())
-                .orElseThrow(() -> new RuntimeException("Quarto não encontrado"));
-
-        // Buscar funcionário real
-        Funcionario funcionario = funcionarioRepository.findById(dto.getFuncionarioId())
-                .orElseThrow(() -> new RuntimeException("Funcionário não encontrado"));
-
+        // Converte DTO para entidade
         Reserva reserva = ReservaMapper.toEntity(dto, funcionario, quarto, null);
         reserva.setUuid(UUID.fromString(uuid));
 
-        // Atualizar reserva com hóspedes
-        this.service.atualizarUUID(reserva, dto.getHospedeUUIDs());
+        // Atualiza reserva com hóspedes
+        service.atualizarUUID(reserva, dto.getHospedeUUIDs());
 
-        // Busca a reserva atualizada no banco
-        Reserva reservaAtualizada = service.buscarPorUUID(uuid);
-
-        return ResponseEntity.ok(ReservaMapper.toDTO(reservaAtualizada));
+        return ResponseEntity.ok(new TratadorDeErros.MensagemSucesso("Reserva atualizada com sucesso!"));
     }
 
     @Operation(summary = "Excluir reserva pelo UUID")
@@ -139,11 +112,6 @@ public class ReservaController {
     })
     @DeleteMapping("/uuid/{uuid}")
     public ResponseEntity deletarUUID(@PathVariable String uuid) {
-        Reserva reserva =  service.buscarPorUUID(uuid);
-
-        if (reserva == null) {
-            return ResponseEntity.notFound().build();
-        }
 
         this.service.deletarUUID(uuid);
         return ResponseEntity.noContent().build();

@@ -1,5 +1,6 @@
 package br.csi.Dormez.service;
 
+import br.csi.Dormez.infra.RecursoNaoEncontradoException;
 import br.csi.Dormez.model.Hospede;
 import br.csi.Dormez.repository.HospedeRepository;
 import org.springframework.stereotype.Service;
@@ -25,36 +26,66 @@ public class HospedeService {
     }
 
     public Hospede buscarPorUUID(String uuid) {
-        UUID uuidformatado = UUID.fromString(uuid);
-        return this.repository.findHospedeByUuid(uuidformatado);
+        UUID uuidFormatado;
+        try {
+            uuidFormatado = UUID.fromString(uuid);
+        } catch (IllegalArgumentException e) {
+            throw new RecursoNaoEncontradoException("UUID inválido.");
+        }
+
+        Hospede hospede = repository.findHospedeByUuid(uuidFormatado);
+        if (hospede == null) {
+            throw new RecursoNaoEncontradoException("Hóspede não encontrado.");
+        }
+        return hospede;
     }
 
     public Hospede buscarPorNome(String nome) {
-        return this.repository.findHospedeByNome(nome);
+        Hospede hospede = repository.findHospedeByNome(nome);
+        if (hospede == null) {
+            throw new RecursoNaoEncontradoException("Hóspede não encontrado.");
+        }
+        return hospede;
     }
 
     public Hospede buscarPorCpf(String cpf) {
-        return this.repository.findHospedeByCpf(cpf);
+        Hospede hospede = repository.findHospedeByCpf(cpf);
+        if (hospede == null) {
+            throw new RecursoNaoEncontradoException("Hóspede não encontrado.");
+        }
+        return hospede;
     }
 
     @Transactional
     public void deletarPorUUID(String uuid) {
-        this.repository.deleteHospedeByUuid(UUID.fromString(uuid));
+        UUID uuidFormatado;
+        try {
+            uuidFormatado = UUID.fromString(uuid);
+        } catch (IllegalArgumentException e) {
+            throw new RecursoNaoEncontradoException("UUID inválido.");
+        }
+
+        Hospede hospede = repository.findHospedeByUuid(uuidFormatado);
+        if (hospede == null) {
+            throw new RecursoNaoEncontradoException("Hóspede não encontrado.");
+        }
+
+        repository.deleteHospedeByUuid(uuidFormatado);
     }
 
     // Atualiza um hospede e retorna a entidade atualizada
     public Hospede atualizarUUID(Hospede hospede) {
 
-        Hospede hosp = this.repository.findHospedeByUuid(hospede.getUuid());
-        if (hosp != null) {
-            hosp.setNome(hospede.getNome());
-            hosp.setEmail(hospede.getEmail());
-            hosp.setTelefone(hospede.getTelefone());
-            hosp.setCpf(hospede.getCpf());
-
-            return this.repository.save(hosp); // Retorna a entidade atualizada
+        Hospede hosp = repository.findHospedeByUuid(hospede.getUuid());
+        if (hosp == null) {
+            throw new RecursoNaoEncontradoException("Hóspede não encontrado.");
         }
 
-        return null;
+        hosp.setNome(hospede.getNome());
+        hosp.setEmail(hospede.getEmail());
+        hosp.setTelefone(hospede.getTelefone());
+        hosp.setCpf(hospede.getCpf());
+
+        return repository.save(hosp);
     }
 }

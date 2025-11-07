@@ -1,5 +1,6 @@
 package br.csi.Dormez.service;
 
+import br.csi.Dormez.infra.RecursoNaoEncontradoException;
 import br.csi.Dormez.model.Funcionario;
 import br.csi.Dormez.repository.FuncionarioRepository;
 import org.springframework.stereotype.Service;
@@ -24,27 +25,50 @@ public class FuncionarioService {
     }
 
     public Funcionario buscarPorUUID(String uuid) {
-        UUID uuidformatado = UUID.fromString(uuid);
-        return this.repository.findFuncionarioByUuid(uuidformatado);
+
+        UUID uuidformatado;
+        try {
+            uuidformatado = UUID.fromString(uuid);
+        } catch (IllegalArgumentException e) {
+            throw new RecursoNaoEncontradoException("UUID inválido.");
+        }
+
+        Funcionario funcionario = repository.findFuncionarioByUuid(uuidformatado);
+        if (funcionario == null) {
+            throw new RecursoNaoEncontradoException("Funcionário não encontrado.");
+        }
+        return funcionario;
     }
 
     @Transactional
     public void deletarUUID(String uuid) {
-        this.repository.deleteFuncionarioByUuid(UUID.fromString(uuid));
+        UUID uuidformatado;
+        try {
+            uuidformatado = UUID.fromString(uuid);
+        } catch (IllegalArgumentException e) {
+            throw new RecursoNaoEncontradoException("UUID inválido.");
+        }
+
+        Funcionario funcionario = repository.findFuncionarioByUuid(uuidformatado);
+        if (funcionario == null) {
+            throw new RecursoNaoEncontradoException("Funcionário não encontrado.");
+        }
+
+        repository.deleteFuncionarioByUuid(uuidformatado);
     }
 
     public Funcionario atualizarUUID(Funcionario funcionario) {
 
         Funcionario func = this.repository.findFuncionarioByUuid(funcionario.getUuid());
-        if (func != null) {
-            func.setNome(funcionario.getNome());
-            func.setEmail(funcionario.getEmail());
-            func.setTelefone(funcionario.getTelefone());
-            func.setCargo(funcionario.getCargo());
-
-            return this.repository.save(func); // Retorna a entidade atualizada
+        if (func == null) {
+            throw new RecursoNaoEncontradoException("Funcionário não encontrado.");
         }
 
-        return null;
+        func.setNome(funcionario.getNome());
+        func.setCargo(funcionario.getCargo());
+        func.setEmail(funcionario.getEmail());
+        func.setTelefone(funcionario.getTelefone());
+
+        return repository.save(func);
     }
 }

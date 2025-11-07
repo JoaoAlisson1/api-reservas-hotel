@@ -1,5 +1,6 @@
 package br.csi.Dormez.service;
 
+import br.csi.Dormez.infra.RecursoNaoEncontradoException;
 import br.csi.Dormez.model.Quarto;
 import br.csi.Dormez.repository.QuartoRepository;
 import org.springframework.stereotype.Service;
@@ -25,15 +26,22 @@ public class QuartoService {
     }
 
     public Quarto buscarPorId(Long id) {
-        return repository.findById(id).orElse(null);
+        return repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Quarto não encontrado."));
     }
 
     public Quarto buscarPorNumero(int numero) {
-        return repository.findByNumero(numero);
+        Quarto quarto = repository.findByNumero(numero);
+        if (quarto == null) {
+            throw new RecursoNaoEncontradoException("Quarto não encontrado.");
+        }
+        return quarto;
     }
 
     @Transactional
     public void deletar(Long id) {
+        if (!repository.existsById(id)) {
+            throw new RecursoNaoEncontradoException("Quarto não encontrado.");
+        }
         repository.deleteById(id);
     }
 
@@ -41,20 +49,14 @@ public class QuartoService {
     @Transactional
     public Quarto atualizar(Quarto quartoAtualizado, Long id) {
         // Busca o quarto existente
-        Quarto existente = repository.findById(id).orElse(null);
+        Quarto existente = repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Quarto não encontrado."));
 
-        if (existente != null) {
-            // Atualiza os campos necessários
-            existente.setNumero(quartoAtualizado.getNumero());
-            existente.setTipo(quartoAtualizado.getTipo());
-            existente.setStatus(quartoAtualizado.getStatus());
-            existente.setDiaria(quartoAtualizado.getDiaria());
+        existente.setNumero(quartoAtualizado.getNumero());
+        existente.setTipo(quartoAtualizado.getTipo());
+        existente.setStatus(quartoAtualizado.getStatus());
+        existente.setDiaria(quartoAtualizado.getDiaria());
 
-            // Salva e retorna o quarto atualizado
-            return repository.save(existente);
-        }
+        return repository.save(existente);
 
-        // Retorna null se não encontrou o quarto
-        return null;
     }
 }

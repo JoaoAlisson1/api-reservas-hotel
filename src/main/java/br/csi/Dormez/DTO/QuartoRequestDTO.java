@@ -21,6 +21,7 @@ public class QuartoRequestDTO {
 
     @Min(value = 1, message = "Número do quarto deve ser maior que zero")
     @Schema(description = "Número identificador do quarto", example = "101")
+    @NotNull(message = "Número do quarto é obrigatório")
     private int numero;
 
     @NotNull(message = "Tipo do quarto é obrigatório")

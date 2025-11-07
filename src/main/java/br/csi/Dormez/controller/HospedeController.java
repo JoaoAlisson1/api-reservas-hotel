@@ -3,7 +3,6 @@ package br.csi.Dormez.controller;
 import br.csi.Dormez.DTO.HospedeRequestDTO;
 import br.csi.Dormez.DTO.HospedeResponseDTO;
 import br.csi.Dormez.DTO.mapper.HospedeMapper;
-import br.csi.Dormez.infra.RecursoNaoEncontradoException;
 import br.csi.Dormez.infra.TratadorDeErros;
 import br.csi.Dormez.model.Hospede;
 import br.csi.Dormez.service.HospedeService;
@@ -27,7 +26,7 @@ import java.util.UUID;
 @Tag(name = "Hospedes", description = "Path relacionado a operações de hospedes")
 public class HospedeController {
 
-    private HospedeService service;
+    private final HospedeService service;
 
     public HospedeController(HospedeService service) {this.service = service;}
 
@@ -66,17 +65,7 @@ public class HospedeController {
     })
     @GetMapping("/uuid/{uuid}")
     public ResponseEntity <HospedeResponseDTO> buscarPorUUID(@PathVariable String uuid) {
-        UUID uuidObj;
-        try {
-            uuidObj = UUID.fromString(uuid); // valida formato do UUID
-        } catch (IllegalArgumentException e) {
-            throw new RecursoNaoEncontradoException("UUID inválido.");
-        }
-
-        Hospede hospede = this.service.buscarPorUUID(uuidObj.toString());
-        if (hospede == null) {
-            throw new RecursoNaoEncontradoException("Hospede não encontrado.");
-        }
+        Hospede hospede = this.service.buscarPorUUID(uuid);
 
         return ResponseEntity.ok(HospedeMapper.toResponseDTO(hospede));
     }
@@ -92,10 +81,6 @@ public class HospedeController {
     public ResponseEntity<HospedeResponseDTO> buscarPorNome(@PathVariable String nome) {
         Hospede hospede =  this.service.buscarPorNome(nome);
 
-        if (hospede == null) {
-            throw new RecursoNaoEncontradoException("Hospede não encontrado.");
-        }
-
         return ResponseEntity.ok(HospedeMapper.toResponseDTO(hospede));
     }
 
@@ -109,10 +94,6 @@ public class HospedeController {
     @GetMapping("/cpf/{cpf}")
     public ResponseEntity<HospedeResponseDTO> buscarPorCpf(@PathVariable String cpf) {
         Hospede hospede = this.service.buscarPorCpf(cpf);
-
-        if (hospede == null) {
-            throw new RecursoNaoEncontradoException("Hospede não encontrado.");
-        }
 
         return ResponseEntity.ok(HospedeMapper.toResponseDTO(hospede));
     }
@@ -129,11 +110,9 @@ public class HospedeController {
     public ResponseEntity<TratadorDeErros.MensagemSucesso> atualizarUUID(@RequestBody @Valid HospedeRequestDTO dto, @PathVariable String uuid) {
         Hospede hospede = HospedeMapper.toEntity(dto);
         hospede.setUuid(UUID.fromString(uuid));
-        Hospede atualizado = this.service.atualizarUUID(hospede);
+        this.service.atualizarUUID(hospede);
 
-        if (atualizado == null) {
-            throw new RecursoNaoEncontradoException("Hospede não encontrado.");
-        }
+
         return ResponseEntity.ok(new TratadorDeErros.MensagemSucesso("Hospede atualizado com sucesso!"));
     }
 
@@ -144,14 +123,9 @@ public class HospedeController {
     })
     @DeleteMapping("/uuid/{uuid}")
     public ResponseEntity<TratadorDeErros.MensagemSucesso> deletarPorUUID(@PathVariable String uuid) {
-        Hospede hospede = service.buscarPorUUID(uuid);
-
-        if (hospede == null) {
-            throw new RecursoNaoEncontradoException("Hospede não encontrado.");
-        }
 
         this.service.deletarPorUUID(uuid);
 
-        return ResponseEntity.ok(new TratadorDeErros.MensagemSucesso("Hospede excluído com sucesso!"));
+        return ResponseEntity.noContent().build();
     }
 }

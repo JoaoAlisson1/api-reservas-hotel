@@ -3,6 +3,7 @@ package br.csi.Dormez.controller;
 import br.csi.Dormez.DTO.QuartoRequestDTO;
 import br.csi.Dormez.DTO.QuartoResponseDTO;
 import br.csi.Dormez.DTO.mapper.QuartoMapper;
+import br.csi.Dormez.infra.TratadorDeErros;
 import br.csi.Dormez.model.Quarto;
 import br.csi.Dormez.service.QuartoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -63,15 +64,12 @@ public class QuartoController {
             @ApiResponse(responseCode = "404", description = "Quarto não encontrado", content = @Content)
     })
     @PutMapping("/{id}")
-    public ResponseEntity<QuartoResponseDTO> atualizar(@RequestBody @Valid QuartoRequestDTO dto, @PathVariable Long id) {
+    public ResponseEntity<TratadorDeErros.MensagemSucesso> atualizar(@RequestBody @Valid QuartoRequestDTO dto, @PathVariable Long id) {
         Quarto quarto = QuartoMapper.toEntity(dto);
         Quarto atualizado = service.atualizar(quarto, id);
 
-        if (atualizado == null) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(new TratadorDeErros.MensagemSucesso("Quarto atualizado com sucesso!"));
 
-        return ResponseEntity.ok(QuartoMapper.toResponseDTO(atualizado));
     }
 
     @Operation(summary = "Buscar quarto por ID")
@@ -84,10 +82,6 @@ public class QuartoController {
     @GetMapping("/id/{id}")
     public ResponseEntity<QuartoResponseDTO> buscarPorId(@PathVariable Long id) {
         Quarto quarto = this.service.buscarPorId(id);
-
-        if (quarto == null) {
-            return ResponseEntity.notFound().build();
-        }
 
         return ResponseEntity.ok(QuartoMapper.toResponseDTO(quarto));
     }
@@ -104,10 +98,6 @@ public class QuartoController {
     public ResponseEntity <QuartoResponseDTO> buscarPorNumero(@PathVariable int numero) {
         Quarto quarto = this.service.buscarPorNumero(numero);
 
-        if (quarto == null) {
-            return ResponseEntity.notFound().build();
-        }
-
         return ResponseEntity.ok(QuartoMapper.toResponseDTO(quarto));
     }
 
@@ -118,12 +108,6 @@ public class QuartoController {
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<QuartoResponseDTO> deletar(@PathVariable Long id) {
-
-        Quarto quarto = this.service.buscarPorId(id);
-
-        if (quarto == null) {
-            return ResponseEntity.notFound().build();
-        }
 
         this.service.deletar(id);
         return ResponseEntity.noContent().build(); // 204 No Content

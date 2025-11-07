@@ -3,6 +3,7 @@ package br.csi.Dormez.controller;
 import br.csi.Dormez.DTO.FuncionarioRequestDTO;
 import br.csi.Dormez.DTO.FuncionarioResponseDTO;
 import br.csi.Dormez.DTO.mapper.FuncionarioMapper;
+import br.csi.Dormez.infra.TratadorDeErros;
 import br.csi.Dormez.model.Funcionario;
 import br.csi.Dormez.service.FuncionarioService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,10 +52,6 @@ public class FuncionarioController {
         //Busca a entidade Funcionario pelo UUID usando o service
         Funcionario funcionario = service.buscarPorUUID(uuid);
 
-        if (funcionario == null) {
-            return ResponseEntity.notFound().build();
-        }
-
         // Converte a entidade para DTO para não expor diretamente o modelo
         FuncionarioResponseDTO responseDTO = FuncionarioMapper.toResponseDTO(funcionario);
         return ResponseEntity.ok(responseDTO);
@@ -87,17 +84,14 @@ public class FuncionarioController {
     })
 
     @PutMapping("/{uuid}")
-    public ResponseEntity<FuncionarioResponseDTO> atualizarUUID(@RequestBody @Valid FuncionarioRequestDTO dto, @PathVariable String uuid) {
+    public ResponseEntity<TratadorDeErros.MensagemSucesso> atualizarUUID(@RequestBody @Valid FuncionarioRequestDTO dto, @PathVariable String uuid) {
         Funcionario funcionario = FuncionarioMapper.toEntity(dto);
         funcionario.setUuid(UUID.fromString(uuid));
 
-        Funcionario atualizado = service.atualizarUUID(funcionario);
+        this.service.atualizarUUID(funcionario);
 
-        if (atualizado == null) {
-            return ResponseEntity.notFound().build();
-        }
 
-        return ResponseEntity.ok(FuncionarioMapper.toResponseDTO(atualizado));
+        return ResponseEntity.ok(new TratadorDeErros.MensagemSucesso("Funcionário atualizado com sucesso!"));
     }
 
     @Operation(summary = "Excluir funcionário pelo UUID")
@@ -107,12 +101,7 @@ public class FuncionarioController {
     })
 
     @DeleteMapping("/uuid/{uuid}")
-    public ResponseEntity<Void> deletarUUID(@PathVariable String uuid) {
-        Funcionario funcionario = this.service.buscarPorUUID(uuid);
-
-        if (funcionario == null) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<TratadorDeErros.MensagemSucesso> deletarUUID(@PathVariable String uuid) {
 
         this.service.deletarUUID(uuid);
         return ResponseEntity.noContent().build();
