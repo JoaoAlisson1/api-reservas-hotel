@@ -32,7 +32,7 @@ public class ReservaRequestDTO {
 
     @NotNull(message = "O ID do funcionário é obrigatório")
     @Schema(description = "ID do funcionário responsável pelo cadastro da reserva", example = "3")
-    private Long funcionarioId;
+    private UUID funcionarioUuid;
 
     @NotNull(message = "O ID do quarto é obrigatório")
     @Schema(description = "ID do quarto reservado", example = "101")

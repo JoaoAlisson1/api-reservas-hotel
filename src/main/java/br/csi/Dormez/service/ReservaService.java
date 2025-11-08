@@ -128,9 +128,13 @@ public class ReservaService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Quarto não encontrado."));
     }
 
-    public Funcionario buscarFuncionario(Long id) {
-        return funcionarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Funcionário não encontrado."));
+    public Funcionario buscarFuncionario(UUID uuid) {
+        Funcionario funcionario = funcionarioRepository.findFuncionarioByUuid(uuid);
+        if (funcionario == null) {
+            throw new RecursoNaoEncontradoException("Funcionário não encontrado.");
+        }
+        return funcionario;
+
     }
 
     private void validarDisponibilidadeQuarto(Quarto quarto) {

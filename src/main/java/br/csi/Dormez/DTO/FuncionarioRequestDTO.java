@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,7 +22,10 @@ public class FuncionarioRequestDTO {
     @Email(message = "Email inválido")
     private String email;
     @NotBlank
-    //@Pattern(regexp = "\\(\\d{2}\\) \\d{4,5}-\\d{4}", message = "Telefone inválido")
+    @Pattern(
+            regexp = "^\\(?\\d{2}\\)? ?9?\\d{4}-?\\d{4}$",
+            message = "Telefone deve estar no formato (99) 99999-9999"
+    )
     @Schema(description = "Telefone para contato", example = "(11) 91234-5678")
     private String telefone;
     @NotNull(message = "Cargo é obrigatório")

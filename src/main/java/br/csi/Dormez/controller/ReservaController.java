@@ -70,7 +70,7 @@ public class ReservaController {
     public ResponseEntity<ReservaResponseDTO> salvar(@RequestBody @Valid ReservaRequestDTO dto, UriComponentsBuilder uriBuilder) {
 
         var quarto = service.buscarQuarto(dto.getQuartoId());
-        var funcionario = service.buscarFuncionario(dto.getFuncionarioId());
+        var funcionario = service.buscarFuncionario(dto.getFuncionarioUuid());
 
         Reserva reserva = ReservaMapper.toEntity(dto, funcionario, quarto, null);
         Reserva reservaSalva = service.salvar(reserva, dto.getHospedeUUIDs());
@@ -93,7 +93,7 @@ public class ReservaController {
     public ResponseEntity<TratadorDeErros.MensagemSucesso> atualizarUUID(@RequestBody @Valid ReservaRequestDTO dto, @PathVariable String uuid) {
         // Busca entidades relacionadas
         var quarto = service.buscarQuarto(dto.getQuartoId());
-        var funcionario = service.buscarFuncionario(dto.getFuncionarioId());
+        var funcionario = service.buscarFuncionario(dto.getFuncionarioUuid());
 
         // Converte DTO para entidade
         Reserva reserva = ReservaMapper.toEntity(dto, funcionario, quarto, null);
