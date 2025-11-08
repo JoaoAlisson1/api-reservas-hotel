@@ -39,7 +39,7 @@ public class UsuarioController {
     public ResponseEntity<Usuario> criar(@RequestBody @Valid Usuario usuario, UriComponentsBuilder uriBuilder) {
         this.service.cadastrar(usuario);
         URI uri = uriBuilder.path("/usuario/{id}").buildAndExpand(usuario.getId()).toUri();
-        return ResponseEntity.created(uri).build();
+        return ResponseEntity.created(uri).body(usuario);
     }
 
     @Operation(summary = "Buscar usuário por ID")
