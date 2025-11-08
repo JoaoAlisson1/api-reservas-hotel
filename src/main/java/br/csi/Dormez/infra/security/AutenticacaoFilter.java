@@ -1,4 +1,4 @@
-package br.csi.Dormez.infra;
+package br.csi.Dormez.infra.security;
 
 import br.csi.Dormez.service.AutenticacaoService;
 import br.csi.Dormez.service.TokenServiceJWT;

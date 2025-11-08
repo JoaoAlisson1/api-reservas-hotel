@@ -1,7 +1,7 @@
 package br.csi.Dormez.DTO;
 
-import br.csi.Dormez.model.StatusQuarto;
-import br.csi.Dormez.model.TipoQuarto;
+import br.csi.Dormez.model.enums.StatusQuarto;
+import br.csi.Dormez.model.enums.TipoQuarto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

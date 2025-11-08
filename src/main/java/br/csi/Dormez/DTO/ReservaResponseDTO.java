@@ -1,6 +1,6 @@
 package br.csi.Dormez.DTO;
 
-import br.csi.Dormez.model.StatusReserva;
+import br.csi.Dormez.model.enums.StatusReserva;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

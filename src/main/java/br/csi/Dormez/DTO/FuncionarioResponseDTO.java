@@ -1,6 +1,6 @@
 package br.csi.Dormez.DTO;
 
-import br.csi.Dormez.model.CargoEnum;
+import br.csi.Dormez.model.enums.CargoEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

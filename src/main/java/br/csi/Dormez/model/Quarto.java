@@ -1,5 +1,7 @@
 package br.csi.Dormez.model;
 
+import br.csi.Dormez.model.enums.StatusQuarto;
+import br.csi.Dormez.model.enums.TipoQuarto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;

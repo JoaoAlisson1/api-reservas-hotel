@@ -1,7 +1,7 @@
 package br.csi.Dormez.service;
 
 import br.csi.Dormez.DTO.DadosUsuario;
-import br.csi.Dormez.infra.RecursoNaoEncontradoException;
+import br.csi.Dormez.infra.exceptions.RecursoNaoEncontradoException;
 import br.csi.Dormez.model.Usuario;
 import br.csi.Dormez.repository.UsuarioRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

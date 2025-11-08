@@ -1,4 +1,4 @@
-package br.csi.Dormez.infra;
+package br.csi.Dormez.infra.exceptions;
 
 public class RecursoNaoEncontradoException extends RuntimeException {
 

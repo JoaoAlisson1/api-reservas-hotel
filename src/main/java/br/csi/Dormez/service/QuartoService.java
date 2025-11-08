@@ -1,6 +1,6 @@
 package br.csi.Dormez.service;
 
-import br.csi.Dormez.infra.RecursoNaoEncontradoException;
+import br.csi.Dormez.infra.exceptions.RecursoNaoEncontradoException;
 import br.csi.Dormez.model.Quarto;
 import br.csi.Dormez.repository.QuartoRepository;
 import org.springframework.stereotype.Service;

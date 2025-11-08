@@ -1,4 +1,4 @@
-package br.csi.Dormez.model;
+package br.csi.Dormez.model.enums;
 
 public enum TipoQuarto {
     Solteiro,

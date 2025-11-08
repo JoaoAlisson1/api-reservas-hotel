@@ -1,7 +1,7 @@
 package br.csi.Dormez.DTO;
 
-import br.csi.Dormez.model.StatusQuarto;
-import br.csi.Dormez.model.TipoQuarto;
+import br.csi.Dormez.model.enums.StatusQuarto;
+import br.csi.Dormez.model.enums.TipoQuarto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;

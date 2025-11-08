@@ -1,5 +1,6 @@
 package br.csi.Dormez.model;
 
+import br.csi.Dormez.model.enums.StatusReserva;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

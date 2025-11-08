@@ -1,7 +1,8 @@
 package br.csi.Dormez.service;
 
-import br.csi.Dormez.infra.RecursoNaoEncontradoException;
+import br.csi.Dormez.infra.exceptions.RecursoNaoEncontradoException;
 import br.csi.Dormez.model.*;
+import br.csi.Dormez.model.enums.StatusQuarto;
 import br.csi.Dormez.repository.FuncionarioRepository;
 import br.csi.Dormez.repository.HospedeRepository;
 import br.csi.Dormez.repository.QuartoRepository;
