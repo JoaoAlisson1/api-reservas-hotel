@@ -7,10 +7,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @OpenAPIDefinition(info = @Info(
-		title = "API Exemplo",
+		title = "Dormez Hoteis API",
 		version = "1.0",
-		description = "Documentação API Exemplo",
-		contact = @Contact(name = "Suporte", email = "suporte@exemplo.com")
+		description = "API para gerenciamento de hóspedes, reservas e funcionários do Hotel Dormez.",
+		contact = @Contact(name = "João Alisson", email = "joaoalissonflores@hotmail.com")
 ))
 
 @SpringBootApplication

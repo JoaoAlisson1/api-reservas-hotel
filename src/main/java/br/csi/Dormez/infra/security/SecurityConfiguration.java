@@ -18,7 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-    private final AutenticacaoFilter autenticacaoFilter;;
+    private final AutenticacaoFilter autenticacaoFilter;
 
     public SecurityConfiguration(AutenticacaoFilter autenticacaoFilter) {
         this.autenticacaoFilter = autenticacaoFilter;
@@ -27,16 +27,30 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-                .csrf(crsf-> crsf.disable())
+                .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth->
-                        auth.requestMatchers(HttpMethod.POST, "/login").permitAll()
-                                .requestMatchers(HttpMethod.GET,"/usuario").hasAuthority("ROLE_ADMIN")
-                                .requestMatchers(HttpMethod.GET,"/funcionario").hasAnyAuthority("ROLE_FUNCIONARIO", "ROLE_ADMIN")
-                                .anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth
+                        // Liberar endpoints do Swagger
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/api-docs/**",
+                                "/v3/api-docs/**",
+                                "/v2/api-docs",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
+                        // Liberar login
+                        .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                        // Permissões existentes
+                        .requestMatchers(HttpMethod.GET, "/usuario").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/funcionario").hasAnyAuthority("ROLE_FUNCIONARIO", "ROLE_ADMIN")
+                        .anyRequest().authenticated()
+                )
                 .addFilterBefore(this.autenticacaoFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
+
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
